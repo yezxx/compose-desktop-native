@@ -239,17 +239,17 @@ apidemo/             → :apidemo   - Postman-style REST API manager. MULTIPLATF
                                     to com.compose.sdl, jvm actuals use AWT + upstream desktop).
                                     mTLS / TLS-chain inspection stays native-only (bundled libcurl).
                                     DOGFOODS the bridge plugin: data.kres packaging + app icon come
-                                    from compose.desktop.native {}; the font pipeline (Noto +
-                                    Material Symbols subsetting) comes from the shared buildSrc
-                                    helper (registerComposeFontBundling).
+                                    from compose.desktop.native {} (and the Noto Sans / Mono
+                                    default fonts, on by default); Material Symbols bundling +
+                                    subsetting comes from the shared buildSrc helper
+                                    (registerComposeFontBundling).
 buildSrc/            → shared build logic for the app modules: ComposeFontBundling.kt -
-                      registerComposeFontBundling { } (everything OPT-IN; no flag = no-op)
-                      registers downloadNotoFonts (bundleNotoSans / bundleNotoSansMono /
-                      autoDetectNotoSansMono), detects the Material Symbols styles the
-                      sources use (bundleMaterialSymbols), wires the font/ entries into
-                      every data.kres Zip (the bridge plugin's package* tasks; hand-rolled
-                      copy*ComposeResources* tasks also match) and stages the same fonts on
-                      the JVM classpath; hb-subset pipeline behind enableIconSubsetting
+                      registerComposeFontBundling { } detects the Material Symbols styles
+                      the sources use (bundleMaterialSymbols, opt-in), wires the font/
+                      entries into every data.kres Zip (the bridge plugin's package*
+                      tasks; hand-rolled copy*ComposeResources* tasks also match) and
+                      stages them + the bridge plugin's Noto fonts on the JVM classpath
+                      (parity); hb-subset pipeline behind enableIconSubsetting
                       (findMaterialSymbolsUsage + subsetMaterialSymbols<Style>).
 gradle-plugin/
 └── compose-desktop-native-bridge/ → the CONSUMER-side bridge as a published Gradle plugin
@@ -561,15 +561,20 @@ Every app ships `<app>.exe` + `data.kres` (a STORED zip alongside the
 executable, loaded via `SDL_GetBasePath()`). Contents:
 
 - App drawables + files under `composeResources/{drawable,files}/`
-- `font/NotoSans.ttf` - the default variable font. Bundling it is the APP's
-  job: each app opts in via `registerComposeFontBundling { bundleNotoSans =
-  true; … }` (buildSrc - every flag is opt-in, no flag = no-op), which
-  registers its `downloadNotoFonts` task (into `<app>/build/fonts/`); the
-  library ships no download task. Pass `-PbundleDefaultFont=false` to skip.
-- `font/NotoSansMono.ttf` - `autoDetectNotoSansMono = true` bundles it when
-  `FontFamily.Monospace` appears in the app sources (demo);
-  `bundleNotoSansMono = true` forces it (apidemo's body font, loaded through
-  its own seam)
+- `font/NotoSans.ttf` (FontFamily.Default), `font/NotoSans-Italic.ttf` (its
+  real FontStyle.Italic) + `font/NotoSansMono.ttf` (FontFamily.Monospace; no
+  Mono italic exists, so that one is a synthetic slant) - the port's DEFAULT
+  fonts, bundled by the BRIDGE PLUGIN for every app, all on by default
+  (`compose.desktop.native { fonts { bundleNotoSans / bundleNotoSansItalic /
+  bundleNotoSansMono } }`, `-PbundleDefaultFont=false` skips all). Found by
+  fixed path - no manifest. `bundleComposeNativeFonts` pins them to a google/fonts commit,
+  SHA-256 verifies, and caches them in `~/.gradle/caches/compose-desktop-native/fonts/`.
+  The runtime ALWAYS prefers the bundled NotoSans; without it `SkiaFonts`
+  falls back to the OS sans-serif (never an empty typeface - issue #5), whose
+  bold / italic come from the OS family match (a static system font has no
+  wght axis). The italic face is never mixed across families. The
+  `font/` root is reserved for these port-level fonts (+ Material Symbols);
+  app fonts go through Compose Resources (`Res.font.*`) like upstream.
 - Material Symbols fonts for the styles the app **actually uses**
   (`bundleMaterialSymbols = true`) - the Zip task scans the app's Kotlin
   sources for `MaterialSymbolsOutlined` / `Rounded` / `Sharp` and only

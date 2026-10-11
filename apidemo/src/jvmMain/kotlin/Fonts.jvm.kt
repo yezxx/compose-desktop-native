@@ -1,6 +1,7 @@
 package apidemo
 
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.platform.Font
 
 // ==================
@@ -30,6 +31,10 @@ actual val defaultFontFamily: FontFamily? by lazy {
         println("apidemo: NotoSans.ttf not on the classpath - using the platform default font")
         null
     } else {
-        FontFamily(Font(identity = kDefaultFamily, data = vBytes))
+        val vItalicBytes = object {}.javaClass.getResourceAsStream("/font/NotoSans-Italic.ttf")?.use { it.readBytes() }
+        FontFamily(listOfNotNull(
+            Font(identity = kDefaultFamily, data = vBytes),
+            vItalicBytes?.let { Font(identity = "$kDefaultFamily-italic", data = it, style = FontStyle.Italic) },
+        ))
     }
 }

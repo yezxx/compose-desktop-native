@@ -5,11 +5,15 @@ import com.compose.sdl.icons.IconFont
 import com.compose.sdl.res.composeResourceReader
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.FontMgr
+import org.jetbrains.skia.FontSlant
+import org.jetbrains.skia.FontWeight
+import org.jetbrains.skia.FontWidth
 import org.jetbrains.skia.FontStyle as SkiaFontStyle
 import org.jetbrains.skia.FontVariation as SkiaFontVariation
 import org.jetbrains.skia.Typeface
 import org.jetbrains.skia.paragraph.FontCollection
 import org.jetbrains.skia.paragraph.TypefaceFontProvider
+import kotlin.math.roundToInt
 
 // ==================
 // MARK: SkiaFonts - font-resolution bridge for the skiko paragraph engine
@@ -38,10 +42,29 @@ internal object SkiaFonts {
 	private val fontMgr = FontMgr.default
 	private val provider = TypefaceFontProvider()
 
-	/** Bundled default (NotoSans from data.kres); the fallback for every unresolved family. */
+	/** font/NotoSans.ttf from data.kres (the bridge plugin bundles it by default), or null. */
+	private val bundledDefault: Typeface? = bundledFont("font/NotoSans.ttf")
+
+	/** The default typeface - the fallback for every unresolved family. ALWAYS NotoSans when
+	   data.kres carries font/NotoSans.ttf. Without it, the OS sans-serif, then the platform's
+	   default face, so the default is never EMPTY: a null typeface measures as all-zero font
+	   metrics, which turned the baseline-shift math into NaN under a height override
+	   (issue #5). Registered under [DEFAULT_ALIAS] either way so the paragraph's alias
+	   lookup lands on the same face. */
 	val defaultTypeface: Typeface? =
-		composeResourceReader?.invoke("font/NotoSans.ttf")
-			?.let { fontMgr.makeFromData(Data.makeFromBytes(it), 0) }
+		(bundledDefault
+			?: resolveGeneric("sans-serif", SkiaFontStyle.NORMAL)
+			?: runCatching { fontMgr.legacyMakeTypeface("", SkiaFontStyle.NORMAL) }.getOrNull())
+			?.also { provider.registerTypeface(it, DEFAULT_ALIAS) }
+
+	/** The real italic companion of [defaultTypeface], from the SAME family: font/NotoSans-Italic.ttf
+	   when the default is the bundled NotoSans, else the OS italic of the system default. Null
+	   when there is none - FontStyle.Italic then falls back to Skia's synthetic slant of the
+	   upright face. Also registered under [DEFAULT_ALIAS], so the alias's style set holds both
+	   faces and skparagraph's style match picks the right one. */
+	val defaultItalicTypeface: Typeface? =
+		(if (bundledDefault != null) bundledFont("font/NotoSans-Italic.ttf")
+		else defaultTypeface?.let { matchItalic(it.familyName) })
 			?.also { provider.registerTypeface(it, DEFAULT_ALIAS) }
 
 	/** Shared collection: the alias provider first (bundled + icon + varied fonts),
@@ -51,16 +74,40 @@ internal object SkiaFonts {
 		setAssetFontManager(provider)
 	}
 
-	// family name (null = default) -> base typeface
-	private val baseCache = mutableMapOf<String?, Typeface?>()
+	// (family name (null = default), weight, italic) -> base typeface
+	private val baseCache = mutableMapOf<Triple<String?, Int, Boolean>, Typeface?>()
 	// resolve key -> (typeface, registered alias)
 	private val resolveCache = mutableMapOf<String, Pair<Typeface?, String>>()
 	private val registered = mutableSetOf(DEFAULT_ALIAS)
 
-	private fun baseTypeface(family: String?): Typeface? =
-		baseCache.getOrPut(family) {
+	private fun bundledFont(path: String): Typeface? =
+		composeResourceReader?.invoke(path)?.let { fontMgr.makeFromData(Data.makeFromBytes(it), 0) }
+
+	/** The OS italic face of [familyName], or null when the family has no real italic. */
+	private fun matchItalic(familyName: String): Typeface? =
+		runCatching { fontMgr.matchFamilyStyle(familyName, SkiaFontStyle.ITALIC) }.getOrNull()?.takeIf { it.isItalic }
+
+	private fun skiaStyle(weight: Int, italic: Boolean): SkiaFontStyle =
+		SkiaFontStyle(weight, FontWidth.NORMAL, if (italic) FontSlant.ITALIC else FontSlant.UPRIGHT)
+
+	/** The default face for [weight] + [italic]. The bundled NotoSans is variable, so its
+	   weight is applied later as the wght axis. A SYSTEM default is usually static (no wght
+	   axis), so its bold / italic faces come from the OS family match instead - otherwise
+	   FontWeight.Bold would render at regular weight on the fallback. */
+	private fun defaultFor(weight: Int, italic: Boolean): Typeface? {
+		val vDefault = defaultTypeface
+		val vStyled = if (italic) defaultItalicTypeface ?: vDefault else vDefault
+		if (bundledDefault != null || vDefault == null || (weight == FontWeight.NORMAL && !italic)) return vStyled
+		return runCatching { fontMgr.matchFamilyStyle(vDefault.familyName, skiaStyle(weight, italic)) }.getOrNull() ?: vStyled
+	}
+
+	private fun baseTypeface(family: String?, weight: Int, italic: Boolean): Typeface? =
+		baseCache.getOrPut(Triple(family, weight, italic)) {
 			val bytes = family?.let { IconFont.bytesFor(it) }
+			val style = skiaStyle(weight, italic)
 			when {
+				// Registered bytes ARE the face (an italic resource font is already italic);
+				// an upright-only family keeps Skia's synthetic slant.
 				bytes != null -> fontMgr.makeFromData(Data.makeFromBytes(bytes), 0)
 				// Generic family (serif / cursive / …) not bundled: resolve through the
 				// per-OS concrete-name alias list (upstream GenericFontFamiliesMapping),
@@ -68,21 +115,21 @@ internal object SkiaFonts {
 				// becoming the sans-serif default. (Monospace is caught by IconFont above
 				// when NotoSansMono is bundled; sans-serif maps to null → default Noto Sans.)
 				family != null && family.startsWith(GENERIC_PREFIX) ->
-					resolveGeneric(family.removePrefix(GENERIC_PREFIX)) ?: defaultTypeface
+					resolveGeneric(family.removePrefix(GENERIC_PREFIX), style) ?: defaultFor(weight, italic)
 				// A concrete family name: resolve against the OS font set (e.g. "Arial",
 				// "Times New Roman"), so a requested system font isn't silently Noto Sans.
 				family != null ->
-					runCatching { fontMgr.matchFamilyStyle(family, SkiaFontStyle.NORMAL) }.getOrNull()
-						?: defaultTypeface
-				else -> defaultTypeface
+					runCatching { fontMgr.matchFamilyStyle(family, style) }.getOrNull()
+						?: defaultFor(weight, italic)
+				else -> defaultFor(weight, italic)
 			}
 		}
 
 	/** Resolve a generic family name (serif / sans-serif / monospace / cursive) to a
-	   concrete OS typeface by trying the per-OS candidate names in order. */
-	private fun resolveGeneric(genericName: String): Typeface? {
+	   concrete OS typeface in [style] by trying the per-OS candidate names in order. */
+	private fun resolveGeneric(genericName: String, style: SkiaFontStyle): Typeface? {
 		for (name in genericFamilyAliases(genericName)) {
-			runCatching { fontMgr.matchFamilyStyle(name, SkiaFontStyle.NORMAL) }.getOrNull()?.let { return it }
+			runCatching { fontMgr.matchFamilyStyle(name, style) }.getOrNull()?.let { return it }
 		}
 		return null
 	}
@@ -90,15 +137,24 @@ internal object SkiaFonts {
 	private fun variationsKey(variations: List<ComposeFontVariation.Setting>): String =
 		variations.sortedBy { it.axisName }.joinToString(",") { "${it.axisName}=${it.toVariationValue(null)}" }
 
-	/** Resolve a family + optional variable-axis settings to a concrete typeface AND
-	   a provider alias (register-on-first-use). Set `fontFamilies = [alias]` and
-	   `typeface = first` on the skiko TextStyle. */
-	fun resolve(family: String?, variations: List<ComposeFontVariation.Setting>?): Pair<Typeface?, String> {
-		if (family == null && variations.isNullOrEmpty()) return defaultTypeface to DEFAULT_ALIAS
+	/** Resolve a family + optional variable-axis settings + [italic] to a concrete typeface
+	   AND a provider alias (register-on-first-use). Set `fontFamilies = [alias]` and
+	   `typeface = first` on the skiko TextStyle. [italic] selects the family's REAL italic
+	   face when one exists; otherwise the upright comes back and Skia slants it. */
+	fun resolve(
+		family: String?,
+		variations: List<ComposeFontVariation.Setting>?,
+		italic: Boolean = false,
+	): Pair<Typeface?, String> {
+		if (family == null && variations.isNullOrEmpty()) return defaultFor(FontWeight.NORMAL, italic) to DEFAULT_ALIAS
 		val varKey = variations?.takeUnless { it.isEmpty() }?.let { variationsKey(it) } ?: ""
-		val key = "${family ?: ""}#$varKey"
+		val key = "${family ?: ""}#$varKey" + if (italic) "#italic" else ""
 		return resolveCache.getOrPut(key) {
-			val base = baseTypeface(family) ?: defaultTypeface
+			// wght also picks the face for static (system) families; variable ones get it
+			// again as an axis below.
+			val weight = variations?.firstOrNull { it.axisName == "wght" }?.toVariationValue(null)?.roundToInt()
+				?: FontWeight.NORMAL
+			val base = baseTypeface(family, weight, italic) ?: defaultFor(weight, italic)
 			val typeface = if (varKey.isEmpty() || base == null) base
 			else runCatching {
 				base.makeClone(variations!!.map { SkiaFontVariation(it.axisName, it.toVariationValue(null)) }.toTypedArray())

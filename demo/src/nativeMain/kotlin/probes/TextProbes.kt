@@ -149,3 +149,84 @@ internal fun runMetricsProbe() {
 // ==================
 // MARK: clicktest
 // ==================
+
+/** --lineheighttest: issue #5 - every LineHeightStyle.Alignment with lineHeight == fontSize
+   (Trim.Both, Mode.Fixed), plus a superscript run, through the real Text measure path
+   (foundation's resolveDefaults turns an unset baselineShift into BaselineShift.None).
+   Proportional used to crash in skiko's setBaselineShift with a NaN shift. */
+internal fun runLineHeightTest() {
+    val vAlignments = listOf(
+        "Proportional" to androidx.compose.ui.text.style.LineHeightStyle.Alignment.Proportional,
+        "Top" to androidx.compose.ui.text.style.LineHeightStyle.Alignment.Top,
+        "Center" to androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center,
+        "Bottom" to androidx.compose.ui.text.style.LineHeightStyle.Alignment.Bottom,
+    )
+    nativeComposeWindow(
+        title = "lineheighttest",
+        width = 400,
+        height = 300,
+        onFrame = { _, frameIndex ->
+            if (frameIndex == 10) {
+                println("lineheighttest: PASS (all alignments measured + drawn)")
+                false
+            } else true
+        },
+    ) {
+        Column(Modifier.fillMaxSize().background(Color.White)) {
+            vAlignments.forEach { (vName, vAlignment) ->
+                val vStyle = androidx.compose.material3.LocalTextStyle.current.copy(
+                    fontSize = 20.sp,
+                    lineHeight = 20.sp,
+                    lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(
+                        alignment = vAlignment,
+                        trim = androidx.compose.ui.text.style.LineHeightStyle.Trim.Both,
+                        mode = androidx.compose.ui.text.style.LineHeightStyle.Mode.Fixed,
+                    ),
+                )
+                Text("Hello $vName", style = vStyle)
+                Text(
+                    androidx.compose.ui.text.buildAnnotatedString {
+                        append("x")
+                        pushStyle(androidx.compose.ui.text.SpanStyle(baselineShift = androidx.compose.ui.text.style.BaselineShift.Superscript))
+                        append("2")
+                        pop()
+                    },
+                    style = vStyle.copy(lineHeight = 30.sp),
+                )
+            }
+        }
+    }
+}
+
+/** --italictest: upright vs FontStyle.Italic for FontFamily.Default (bundled NotoSans +
+   NotoSans-Italic: a REAL italic), Default bold, Monospace (NotoSansMono - no italic file
+   exists, so a synthetic slant) and a system Serif (the OS italic face). */
+internal fun runItalicTest() {
+    nativeComposeWindow(
+        title = "italictest",
+        width = 640,
+        height = 360,
+        onFrame = { vBridge, vFrame ->
+            if (vFrame >= 10) {
+                val vSnap = vBridge.snapshotBgra()
+                if (vSnap != null) {
+                    val (vW, vH, vBgra) = vSnap
+                    writeFile("italictest.bmp", encodeBmpBgra32(vW, vH, vBgra))
+                    println("italictest: wrote italictest.bmp (${vW}x${vH})")
+                }
+                false
+            } else true
+        },
+    ) {
+        val vItalic = androidx.compose.ui.text.font.FontStyle.Italic
+        val vBold = androidx.compose.ui.text.font.FontWeight.Bold
+        val vMono = androidx.compose.ui.text.font.FontFamily.Monospace
+        val vSerif = androidx.compose.ui.text.font.FontFamily.Serif
+        Column(Modifier.fillMaxSize().background(Color.White).padding(12.dp)) {
+            Row { Text("Default Hamburgefonts ", fontSize = 26.sp); Text("Hamburgefonts", fontSize = 26.sp, fontStyle = vItalic) }
+            Row { Text("Bold Hamburgefonts ", fontSize = 26.sp, fontWeight = vBold); Text("Hamburgefonts", fontSize = 26.sp, fontWeight = vBold, fontStyle = vItalic) }
+            Row { Text("Mono Hamburgefonts ", fontSize = 26.sp, fontFamily = vMono); Text("Hamburgefonts", fontSize = 26.sp, fontFamily = vMono, fontStyle = vItalic) }
+            Row { Text("Serif Hamburgefonts ", fontSize = 26.sp, fontFamily = vSerif); Text("Hamburgefonts", fontSize = 26.sp, fontFamily = vSerif, fontStyle = vItalic) }
+        }
+    }
+}

@@ -10,10 +10,9 @@ import com.compose.sdl.loadComposeResourceBytes
 /**
  * Registers the bundled fonts that back the generic FontFamily.* values, under the
  * "generic:<name>" keys that FontFamily.projectFontName() returns. Today only
- * Monospace has a bundled font (NotoSansMono, fetched by the app's downloadNotoFonts task);
- * an app opts in by bundling font/NotoSansMono.ttf into its data.kres. When a generic
- * isn't bundled the lookup misses and the renderer falls back to the default font, so
- * FontFamily.Monospace simply renders as the default sans until the mono font is bundled.
+ * Monospace has a bundled font (font/NotoSansMono.ttf, put in data.kres by the bridge
+ * plugin's default-font bundling). When a generic isn't bundled the lookup misses and the
+ * renderer resolves it to the OS font for that generic (SkiaFonts.resolveGeneric).
  *
  * Idempotent; called from ComposeWindow.installGlobals (data.kres is loadable by then).
  */

@@ -160,6 +160,14 @@ fun main(args: Array<String>) {
         runFontTest()
         return
     }
+    if (args.any { it == "--italictest" }) {
+        runItalicTest()
+        return
+    }
+    if (args.any { it == "--lineheighttest" }) {
+        runLineHeightTest()
+        return
+    }
 
     val vCli = parseArgs(args)
     val vTitle = buildString {

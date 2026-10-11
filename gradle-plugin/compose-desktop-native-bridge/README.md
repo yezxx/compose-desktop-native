@@ -215,6 +215,33 @@ background-less mark (looks right in the taskbar) and `exeIcon` at the full
 branded icon with a background (stays legible in Explorer) - the same split
 apidemo uses.
 
+### Default fonts
+
+The port's default fonts are bundled into `data.kres` automatically:
+`font/NotoSans.ttf` backs `FontFamily.Default`, `font/NotoSans-Italic.ttf` its
+real `FontStyle.Italic`, and `font/NotoSansMono.ttf` backs `FontFamily.Monospace`
+(Google ships no Mono italic, so that one is slanted synthetically). Text looks
+the same on every OS, and matches the JVM build when it uses Noto too. All are
+on by default:
+
+```kotlin
+compose.desktop {
+    native {
+        fonts {
+            bundleNotoSans.set(false)        // optional: FontFamily.Default → system sans-serif
+            bundleNotoSansItalic.set(false)  // optional: Italic → synthetic slant of NotoSans
+            bundleNotoSansMono.set(false)    // optional: FontFamily.Monospace → system monospace
+        }
+    }
+}
+```
+
+`-PbundleDefaultFont=false` skips all of them for one build. The fonts are pinned to
+a google/fonts commit, SHA-256 verified, and downloaded once into
+`~/.gradle/caches/compose-desktop-native/fonts/` (if the download fails, the
+error names the exact path to drop the file at). Without them the runtime falls back to the OS fonts.
+Your own fonts go through Compose Resources (`Res.font.*`) as usual.
+
 ## composeResources - zero setup
 
 If the module also applies the official `org.jetbrains.compose` plugin, the

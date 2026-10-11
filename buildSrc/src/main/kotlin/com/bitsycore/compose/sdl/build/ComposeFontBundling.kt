@@ -13,7 +13,6 @@ import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.language.jvm.tasks.ProcessResources
-import java.net.URI
 
 // ==================
 // MARK: Configuration
@@ -21,27 +20,11 @@ import java.net.URI
 
 /**
  * Per-app knobs for [registerComposeFontBundling]. EVERYTHING is opt-in - with no
- * flag set the call registers no tasks and stages nothing.
+ * flag set the call only stages the bridge plugin's default fonts on the JVM classpath.
+ * Noto Sans / Noto Sans Mono themselves are bundled into data.kres by the bridge
+ * plugin (compose.desktop.native { fonts { } }, on by default), not here.
  */
 class ComposeFontBundlingConfig {
-	/**
-	 * Bundle font/NotoSans.ttf, the default UI font the text renderers load at startup.
-	 * -PbundleDefaultFont=false still skips it (system-font fallback).
-	 */
-	var bundleNotoSans: Boolean = false
-
-	/**
-	 * Always bundle font/NotoSansMono.ttf - for apps that load the mono font through
-	 * their own seam (apidemo's body font, Fonts.kt), invisible to auto-detection.
-	 */
-	var bundleNotoSansMono: Boolean = false
-
-	/**
-	 * Bundle font/NotoSansMono.ttf only when `FontFamily.Monospace` appears in the
-	 * app's Kotlin sources (it backs the generic monospace family at runtime).
-	 */
-	var autoDetectNotoSansMono: Boolean = false
-
 	/**
 	 * Bundle one Material Symbols font per style whose call sites appear in the app's
 	 * Kotlin sources (MaterialSymbolsOutlined / Rounded / Sharp).
@@ -65,27 +48,25 @@ private val kAllStyles = listOf(
 	"Sharp" to Regex("\\bMaterialSymbolsSharp\\b"),
 )
 
-// FontFamily.Monospace call sites → NotoSansMono is worth bundling.
-private val kMonospaceRegex = Regex("\\bFontFamily\\.Monospace\\b")
+// The bridge plugin's default-font staging task (Noto Sans + Noto Sans Mono).
+private const val kBridgeFontsTask = "bundleComposeNativeFonts"
 
 // ==================
 // MARK: Entry point
 // ==================
 
 /**
- * Wires the app font pipeline shared by :demo and :apidemo. Everything is OPT-IN via
- * [ComposeFontBundlingConfig] - a bare call is a no-op.
+ * Wires the app font pipeline shared by :demo and :apidemo. Material Symbols is OPT-IN
+ * via [ComposeFontBundlingConfig].
  *
- * - Registers downloadNotoFonts (Noto Sans + Noto Sans Mono variable fonts →
- *   build/fonts/) when a Noto font is bundled.
- * - Adds the opted-in font/ entries to every data.kres Zip task - the bridge plugin's
+ * - Adds the used Material Symbols font/ entries to every data.kres Zip task - the bridge plugin's
  *   package<Variant>ComposeResources<Target> tasks or an app's own copy* tasks
  *   (matching{} is lazy: the plugin's tasks appear in its afterEvaluate). Material
  *   Symbols fonts are hb-subset to the used glyphs when subsetting is enabled.
- * - Stages the same fonts (always full, never subset) onto the JVM classpath via
- *   jvmProcessResources: the :material-symbols JVM actual loads font/<Style>.ttf, and
- *   the parity harness's JVM leg renders with the same NotoSans as the native leg
- *   (P0.3, RENDERER.md §8).
+ * - Stages the same fonts (always full, never subset) plus the bridge plugin's default
+ *   Noto fonts onto the JVM classpath via jvmProcessResources: the :material-symbols
+ *   JVM actual loads font/<Style>.ttf, and the parity harness's JVM leg renders with
+ *   the same NotoSans as the native leg (P0.3, RENDERER.md §8).
  */
 fun Project.registerComposeFontBundling(configure: ComposeFontBundlingConfig.() -> Unit) {
 	val vConfig = ComposeFontBundlingConfig().apply(configure)
@@ -93,12 +74,11 @@ fun Project.registerComposeFontBundling(configure: ComposeFontBundlingConfig.() 
 	// ============
 	//  What to bundle
 	// ============
-	val vBundleSans = vConfig.bundleNotoSans &&
-			providers.gradleProperty("bundleDefaultFont").map(String::toBoolean).getOrElse(true)
-	val vBundleMono = vConfig.bundleNotoSansMono ||
-			(vConfig.autoDetectNotoSansMono && sourcesMatch(kMonospaceRegex))
 	val vUsedStyles = if (vConfig.bundleMaterialSymbols) detectUsedStyles() else emptyList()
-	if (!vBundleSans && !vBundleMono && vUsedStyles.isEmpty()) return
+	tasks.withType<ProcessResources>().matching { it.name == "jvmProcessResources" }.configureEach {
+		if (kBridgeFontsTask in tasks.names) from(tasks.named(kBridgeFontsTask)) { into("font") }
+	}
+	if (vUsedStyles.isEmpty()) return
 
 	val vSubsetIcons = vConfig.enableIconSubsetting && vUsedStyles.isNotEmpty() &&
 			providers.gradleProperty("subsetIcons").map(String::toBoolean).getOrElse(false)
@@ -106,60 +86,22 @@ fun Project.registerComposeFontBundling(configure: ComposeFontBundlingConfig.() 
 	val vSubsetTasksByStyle = if (vSubsetIcons) registerIconSubsetPipeline(vUsedStyles) else emptyMap()
 
 	// ============
-	//  Noto downloads
-	// ============
-	val vNotoSansFile = layout.buildDirectory.file("fonts/NotoSans.ttf")
-	val vNotoMonoFile = layout.buildDirectory.file("fonts/NotoSansMono.ttf")
-	val vNotoFiles = buildList {
-		if (vBundleSans) add(vNotoSansFile)
-		if (vBundleMono) add(vNotoMonoFile)
-	}
-	val vDownloadNotoFonts = if (vNotoFiles.isEmpty()) null else tasks.register("downloadNotoFonts") {
-		description = "Download the Google Noto variable fonts (Sans + SansMono) to build/fonts/."
-		val vDownloads = listOf(
-			"https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf"
-					to vNotoSansFile.get().asFile,
-			"https://raw.githubusercontent.com/google/fonts/main/ofl/notosansmono/NotoSansMono%5Bwdth%2Cwght%5D.ttf"
-					to vNotoMonoFile.get().asFile,
-		)
-		outputs.files(vDownloads.map { it.second })
-		doLast {
-			for ((vUrl, vOut) in vDownloads) {
-				if (vOut.exists() && vOut.length() > 0) continue
-				vOut.parentFile.mkdirs()
-				println("Downloading $vUrl")
-				URI(vUrl).toURL().openStream().use { vIn -> vOut.outputStream().use { vIn.copyTo(it) } }
-			}
-		}
-	}
-
-	// ============
 	//  data.kres font/ entries (native) + JVM classpath analog
 	// ============
 	tasks.withType<Zip>().matching {
 		(it.name.startsWith("package") || it.name.startsWith("copy")) && it.name.contains("ComposeResources")
 	}.configureEach {
-		addFontEntries(this, vNotoFiles, vDownloadNotoFonts, vUsedStyles, vSubsetTasksByStyle)
+		addFontEntries(this, vUsedStyles, vSubsetTasksByStyle)
 	}
 	tasks.withType<ProcessResources>().matching { it.name == "jvmProcessResources" }.configureEach {
 		// Full fonts on JVM - Skiko applies the variable axes itself (Typeface.makeClone).
-		addFontEntries(this, vNotoFiles, vDownloadNotoFonts, vUsedStyles, emptyMap())
+		addFontEntries(this, vUsedStyles, emptyMap())
 	}
 }
 
 // ==================
 // MARK: Source scanning
 // ==================
-
-/**
- * True when any Kotlin file under src/ matches inRegex.
- */
-private fun Project.sourcesMatch(inRegex: Regex): Boolean {
-	val vSrcRoot = layout.projectDirectory.dir("src").asFile
-	return vSrcRoot.exists() && vSrcRoot.walk().any {
-		it.isFile && it.extension == "kt" && inRegex.containsMatchIn(it.readText())
-	}
-}
 
 /**
  * The Material Symbols styles whose call sites appear in the app's Kotlin sources.
@@ -182,21 +124,15 @@ private fun Project.detectUsedStyles(): List<String> {
 // ==================
 
 /**
- * Adds the font/ entries (Notos + used Material Symbols styles) to inTask - a data.kres
+ * Adds the font/ entries (used Material Symbols styles) to inTask - a data.kres
  * Zip or jvmProcessResources. inSubsetTasksByStyle maps styles to hb-subset tasks whose
  * output replaces the full font; pass an empty map to stage the full fonts.
  */
 private fun Project.addFontEntries(
 	inTask: AbstractCopyTask,
-	inNotoFiles: List<Provider<RegularFile>>,
-	inDownloadNotoFonts: TaskProvider<*>?,
 	inUsedStyles: List<String>,
 	inSubsetTasksByStyle: Map<String, TaskProvider<*>>,
 ) {
-	for (vNotoFile in inNotoFiles) {
-		inTask.from(vNotoFile) { into("font") }
-		inDownloadNotoFonts?.let { inTask.dependsOn(it) }
-	}
 	val vSymbolsProject = rootProject.project(":utils:material-symbols")
 	for (vStyle in inUsedStyles) {
 		@Suppress("UNCHECKED_CAST")

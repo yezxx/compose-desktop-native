@@ -102,13 +102,13 @@ internal class SkiaParagraphOps(
 
 	private val fontPx: Float =
 		((if (style.fontSize.isSpecified) style.fontSize.value else 14f) * density).coerceAtLeast(1f)
-	private val baseFamily: String? = style.fontFamily.projectFontName()
+	private val baseFamily: String? = style.fontFamily.projectFontName(style.fontStyle)
 	// Icon families (Material Symbols) carry explicit axes on the family; ordinary
 	// text derives only the wght axis from the paragraph FontWeight.
 	private val baseVariations: List<FontVariation.Setting>? =
 		style.fontFamily.projectFontVariations()
 			?: style.fontWeight?.let { listOf(FontVariation.weight(it.weight)) }
-	private val baseTypeface = SkiaFonts.resolve(baseFamily, baseVariations).first
+	private val baseTypeface = SkiaFonts.resolve(baseFamily, baseVariations, style.fontStyle == FontStyle.Italic).first
 	private val defaultFont = SkFont(baseTypeface ?: SkiaFonts.defaultTypeface, fontPx)
 	// Skia's ParagraphStyle.replaceTabCharacters (set below) expands U+0009 to a space
 	// before shaping (CMP-6589). The Windows skiko fork's flat extern-C surface doesn't
@@ -394,7 +394,7 @@ internal class SkiaParagraphOps(
 		color: Color, shadow: Shadow?, decoration: TextDecoration?,
 		active: List<AnnotatedString.Range<SpanStyle>>,
 	): SkTextStyle {
-		var family = baseFamily
+		var fontFamily = style.fontFamily
 		var variations = baseVariations
 		var size = fontPx
 		var segColor = color
@@ -409,11 +409,14 @@ internal class SkiaParagraphOps(
 			if (sp.fontSize.isSpecified) size = (sp.fontSize.value * density).coerceAtLeast(1f)
 			sp.fontStyle?.let { fontStyle = it }
 			sp.textDecoration?.let { deco = it }
-			sp.fontFamily.projectFontName()?.let { family = it }
+			if (sp.fontFamily.projectFontName() != null) fontFamily = sp.fontFamily
 			sp.fontFamily.projectFontVariations()?.let { variations = it }
 			sp.baselineShift?.let { baselineShift = it }
 			if (sp.background.isSpecified) background = sp.background
 		}
+		// Resolved after the loop: a span's fontStyle picks the italic member of the
+		// family even when the family itself came from the base style.
+		val family = fontFamily.projectFontName(fontStyle)
 		return makeTextStyle(family, variations, size, segColor, fontStyle, deco, shadow, baselineShift, background)
 	}
 
@@ -431,6 +434,21 @@ internal class SkiaParagraphOps(
 		ts.fontEdging = RASTER_EDGING
 		ts.fontHinting = RASTER_HINTING
 		ts.subpixel = RASTER_SUBPIXEL
+		// Register + resolve to a provider alias so skiko's shaper maps codepoints
+		// through the exact typeface (icon fonts would otherwise fall back to
+		// Noto Sans and render private-use glyphs as tofu).
+		val (tf, alias) = SkiaFonts.resolve(family, variations, fontStyle == FontStyle.Italic)
+		tf?.let { ts.typeface = it }
+		ts.fontFamilies = arrayOf(alias)
+		// Superscript / subscript: shift the baseline by a multiple of the font ascent.
+		// Order mirrors upstream ParagraphBuilder.skiko.kt: AFTER typeface + fontSize
+		// (fontMetrics needs the resolved font) but BEFORE height / topRatio. With a
+		// height override and Proportional alignment (topRatio -1) skia rescales the
+		// ascent by lineHeight / fontHeight, which is 0/0 = NaN when no typeface is
+		// resolved (no bundled NotoSans) - and skiko's setBaselineShift rejects NaN
+		// (issue #5). foundation's resolveDefaults always sets BaselineShift.None, so
+		// this runs for every Text, not just super/subscript.
+		baselineShift?.let { ts.baselineShift = it.multiplier * ts.fontMetrics.ascent }
 		// Per-run line height (upstream: res.height = lineHeight / fontSize), set only
 		// when lineHeight is specified so untouched text keeps skiko's default spacing.
 		resolveLineHeightPx(sizePx)?.let { ts.height = it / sizePx }
@@ -444,16 +462,6 @@ internal class SkiaParagraphOps(
 		ts.topRatio = (style.lineHeightStyle?.alignment ?: LineHeightStyle.Alignment.Proportional).topRatio
 		// Span/base background fill behind the run.
 		if (background.isSpecified) ts.background = SkPaint().also { it.color = background.toArgb() }
-		// Register + resolve to a provider alias so skiko's shaper maps codepoints
-		// through the exact typeface (icon fonts would otherwise fall back to
-		// Noto Sans and render private-use glyphs as tofu).
-		val (tf, alias) = SkiaFonts.resolve(family, variations)
-		tf?.let { ts.typeface = it }
-		ts.fontFamilies = arrayOf(alias)
-		// Superscript / subscript: shift the baseline by a multiple of the font ascent.
-		// MUST run after the typeface + fontSize are set - `fontMetrics` is undefined
-		// without a resolved font, and skiko's setBaselineShift rejects the NaN.
-		baselineShift?.let { ts.baselineShift = it.multiplier * ts.fontMetrics.ascent }
 		if (fontStyle == FontStyle.Italic) ts.fontStyle = SkFontStyle.ITALIC
 		decoration?.takeUnless { it == TextDecoration.None }?.let {
 			ts.decorationStyle = SkDecorationStyle(

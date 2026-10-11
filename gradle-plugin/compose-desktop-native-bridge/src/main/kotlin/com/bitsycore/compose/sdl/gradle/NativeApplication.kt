@@ -62,6 +62,7 @@ abstract class NativeIconSpec {
  *     native {                                             // this port
  *         entryPoint = "bubblewrap.main"
  *         icon { light.from("icons/app-128.png") }         // optional
+ *         fonts { bundleNotoSansMono.set(false) }          // optional (both on by default)
  *     }
  * }
  * ```
@@ -86,6 +87,15 @@ abstract class ComposeDesktopNativeExtension {
 	fun icon(action: Action<NativeIconSpec>) {
 		action.execute(icon)
 	}
+
+	/** Default-font bundling (see [NativeFontsSpec]); Noto Sans + Noto Sans Mono, both on by default. */
+	@get:Nested
+	abstract val fonts: NativeFontsSpec
+
+	/** Configure default-font bundling: `fonts { bundleNotoSansMono.set(false) }`. */
+	fun fonts(action: Action<NativeFontsSpec>) {
+		action.execute(fonts)
+	}
 }
 
 /** Grafts the `native` extension onto the Compose plugin's `desktop` extension
@@ -100,6 +110,7 @@ internal fun installNativeApplicationDsl(project: Project) {
 			val desktopExt = composeExt.extensions.findByName("desktop") as? ExtensionAware ?: return@withPlugin
 			if (desktopExt.extensions.findByName("native") != null) return@withPlugin
 			val nativeExt = desktopExt.extensions.create("native", ComposeDesktopNativeExtension::class.java)
+			installDefaultFonts(project, nativeExt.fonts)
 			project.afterEvaluate {
 				configureNativeExecutables(it, nativeExt)
 				injectWindowsIconLinkerOpts(it, nativeExt)

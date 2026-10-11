@@ -1,8 +1,10 @@
 package apidemo
 
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import com.compose.sdl.icons.IconFont
 import com.compose.sdl.loadComposeResourceBytes
+import com.compose.sdl.text.NamedFont
 import com.compose.sdl.text.namedFontFamily
 
 // ==================
@@ -25,7 +27,8 @@ actual val monoFontFamily: FontFamily? by lazy {
 }
 
 /** Native already resolves FontFamily.Default to the bundled NotoSans, but the
-family is registered by name so both stacks go through the same lookup. */
+family is registered by name so both stacks go through the same lookup. The italic
+member (font/NotoSans-Italic.ttf) keeps FontStyle.Italic a real italic, not a slant. */
 actual val defaultFontFamily: FontFamily? by lazy {
     val vBytes = loadComposeResourceBytes("font/NotoSans.ttf")
     if (vBytes == null) {
@@ -33,6 +36,11 @@ actual val defaultFontFamily: FontFamily? by lazy {
         null
     } else {
         IconFont.register(kDefaultFamily, vBytes)
-        namedFontFamily(kDefaultFamily)
+        val vItalicBytes = loadComposeResourceBytes("font/NotoSans-Italic.ttf")
+        vItalicBytes?.let { IconFont.register("$kDefaultFamily-italic", it) }
+        FontFamily(listOfNotNull(
+            NamedFont(kDefaultFamily),
+            vItalicBytes?.let { NamedFont("$kDefaultFamily-italic", style = FontStyle.Italic) },
+        ))
     }
 }

@@ -134,11 +134,10 @@ compose.desktop.native {
 // MARK: Fonts (shared pipeline - buildSrc ComposeFontBundling.kt)
 // ==================
 
+// Noto Sans + Noto Sans Mono (the body font, Fonts.kt) come from the bridge plugin
+// (compose.desktop.native { fonts {} }, on by default); this adds Material Symbols +
+// the JVM parity staging.
 registerComposeFontBundling {
-    bundleNotoSans = true
-    // The mono body font is loaded through the app's own seam (Fonts.kt), not via
-    // FontFamily.Monospace call sites - auto-detection can't see it, bundle explicitly.
-    bundleNotoSansMono = true
     bundleMaterialSymbols = true
     enableIconSubsetting = true
 }

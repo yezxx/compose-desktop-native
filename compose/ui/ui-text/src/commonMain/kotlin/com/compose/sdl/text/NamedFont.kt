@@ -67,15 +67,22 @@ fun namedFontFamily(
 
 /**
  * Extract the renderer font-registry name for a `FontFamily`:
- *   * a [namedFontFamily] (`FontListFontFamily` whose first font is a [NamedFont]) → its name;
+ *   * a [namedFontFamily] (`FontListFontFamily` whose first font is a [NamedFont]) → its name -
+ *     or, when [style] is given, the name of the family's [NamedFont] with that style
+ *     (`FontFamily(Font(Res.font.x), Font(Res.font.x_italic, style = Italic))` renders the
+ *     real italic file), falling back to the first;
  *   * a generic `FontFamily.Monospace` / `Serif` / `Cursive` → `"generic:<name>"`, which the
  *     renderer resolves to the bundled generic font (registerGenericFonts), falling back to the
  *     default font when that generic isn't bundled;
  *   * everything else (`Default`, `SansSerif`, `LoadedFontFamily`, resource-backed lists) → `null`
  *     (the default font).
  */
-fun FontFamily?.projectFontName(): String? = when (this) {
-	is FontListFontFamily -> (firstOrNull() as? NamedFont)?.name
+fun FontFamily?.projectFontName(style: FontStyle? = null): String? = when (this) {
+	is FontListFontFamily -> {
+		val vFirst = firstOrNull() as? NamedFont
+		if (vFirst == null || style == null) vFirst?.name
+		else (fonts.firstOrNull { it is NamedFont && it.style == style } as? NamedFont ?: vFirst).name
+	}
 	is androidx.compose.ui.text.font.GenericFontFamily ->
 		if (name == "sans-serif") null else "generic:$name"
 	else -> null

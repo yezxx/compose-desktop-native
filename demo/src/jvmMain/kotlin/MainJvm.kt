@@ -111,7 +111,8 @@ private fun screenshotAllScreens(outDir: File, width: Int, height: Int) {
 }
 
 // P0.3 (RENDERER.md §8): the SAME default font the native leg bundles
-// (font/NotoSans.ttf, staged onto the JVM classpath by jvmProcessResources). Loading it
+// (font/NotoSans.ttf + its real italic font/NotoSans-Italic.ttf, staged onto the JVM
+// classpath by jvmProcessResources). Loading it
 // into the parity JVM leg collapses the font-drift baseline to (near) just rasterizer AA -
 // so the parity % measures real divergence, not "different default typeface". Null (→ no
 // alignment, harness still runs) if the resource is missing.
@@ -120,7 +121,15 @@ private val notoSans: FontFamily? by lazy {
     if (bytes == null) {
         println("parity(jvm): /font/NotoSans.ttf not on classpath - font NOT aligned")
         null
-    } else FontFamily(Font(identity = "NotoSans", data = bytes))
+    } else {
+        val italicBytes = object {}.javaClass.getResourceAsStream("/font/NotoSans-Italic.ttf")?.readBytes()
+        FontFamily(listOfNotNull(
+            Font(identity = "NotoSans", data = bytes),
+            italicBytes?.let {
+                Font(identity = "NotoSans-Italic", data = it, style = androidx.compose.ui.text.font.FontStyle.Italic)
+            },
+        ))
+    }
 }
 
 /** A copy of the M3 Typography with every core style forced to [family] (Typography styles

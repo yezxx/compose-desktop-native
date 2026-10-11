@@ -119,9 +119,9 @@ compose.resources {
     packageOfResClass = "demo.generated.resources"
 }
 
+// Noto Sans + Noto Sans Mono come from the bridge plugin (compose.desktop.native
+// { fonts {} }, on by default); this adds Material Symbols + the JVM parity staging.
 registerComposeFontBundling {
-    bundleNotoSans = true
-    autoDetectNotoSansMono = true
     bundleMaterialSymbols = true
 }
 // The mingwX64 skiko-windows-x64.dll is provisioned automatically by the bridge
