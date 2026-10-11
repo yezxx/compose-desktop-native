@@ -104,7 +104,9 @@ val kPublishedLibs = setOf(
     ":compose:foundation:foundation", ":compose:foundation:foundation-layout",
     ":compose:material3:material3", ":compose:material:material-ripple",
     ":compose:material3:adaptive:adaptive", ":compose:material3:adaptive:adaptive-layout", ":compose:material3:adaptive:adaptive-navigation", ":compose:material3:adaptive:adaptive-navigation3",
-    ":compose:desktop:native:desktop-native-window", ":utils:material-symbols",
+    // :utils:material-symbols is deliberately NOT published - an in-repo utility
+    // until it is a polished, general-purpose API.
+    ":compose:desktop:native:desktop-native-window",
     ":navigation3:navigation3-ui", ":components:resources:components-resources",
     ":koin:koin-core-viewmodel", ":koin:koin-compose",
     ":koin:koin-compose-viewmodel", ":koin:koin-compose-navigation3",

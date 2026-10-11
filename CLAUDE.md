@@ -146,9 +146,11 @@ utils/
                                                     modules on native configs
                                                     (:demo and :apidemo commonMains rely on the same
                                                     bridge; :compose-desktop-native-bridge ships it to
-                                                    consumers). Apps get one dep; the consumer Zip task
-                                                    bundles only the fonts used (native) and
-                                                    jvmProcessResources stages the same fonts (jvm).
+                                                    consumers). IN-REPO UTILITY, NOT PUBLISHED (left
+                                                    out of kPublishedLibs until it is a polished API);
+                                                    the buildSrc helper bundles only the styles the
+                                                    app uses (native) and jvmProcessResources stages
+                                                    the same fonts (jvm).
 
 components/
 └── resources/components-resources/  → :components:resources:components-resources - the OFFICIAL Compose resources
@@ -579,8 +581,8 @@ executable, loaded via `SDL_GetBasePath()`). Contents:
   (`bundleMaterialSymbols = true`) - the Zip task scans the app's Kotlin
   sources for `MaterialSymbolsOutlined` / `Rounded` / `Sharp` and only
   bundles the fonts referenced.
-- `-PsubsetIcons=true` (default on, opted into per app via
-  `enableIconSubsetting = true` - apidemo yes, demo no):
+- Icon subsetting - opt-in per app (`enableIconSubsetting = true` - apidemo
+  yes, demo no) AND gated by `-PsubsetIcons` (set true in gradle.properties):
   `scripts/subset-material-symbols.py` scans app sources for
   `MaterialSymbols.<Name>` usage and hb-subsets each bundled font down to
   just those glyphs. Needs `hb-subset` on PATH (`brew install harfbuzz` /
@@ -646,9 +648,15 @@ drift / vendor-clean guardrails are in
 
 ### Icons
 - `compose/foundation/foundation/src/nativeMain/…/icons/IconFontIcon.kt` -
-  codepoint-based `Icon` composable + `MaterialIconAxes` /
-  `MaterialIconAxisDefaults`.
-- `utils/material-symbols/src/…/MaterialSymbols{Outlined,Rounded,Sharp}.kt`.
+  codepoint-based icon composable over a registered `IconFont` family.
+- `utils/material-symbols/src/commonMain/…/material/symbols/MaterialSymbolsIcon.kt` -
+  the `MaterialSymbolsOutlined` / `Rounded` / `Sharp` objects +
+  `MaterialIconAxisDefaults`; per-stack actuals `MaterialSymbolsIcon.native.kt`
+  (IconFont + IconFontIcon) / `.jvm.kt` (Skiko direct).
+- `compose/ui/ui-text/src/skikoRendererMain/…/renderer/skia/SkiaFonts.kt` - default
+  font resolution (bundled NotoSans / NotoSans-Italic, else the OS family).
+- `gradle-plugin/compose-desktop-native-bridge/…/DefaultFonts.kt` - the
+  `compose.desktop.native { fonts {} }` bundling of the default fonts.
 
 ### Resources
 - `compose/ui/ui/src/commonMain/…/res/Res.kt` - the project's

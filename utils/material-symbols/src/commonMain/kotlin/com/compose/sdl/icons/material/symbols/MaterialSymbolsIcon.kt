@@ -21,11 +21,12 @@ import androidx.compose.ui.unit.dp
      native  - the port's IconFont pipeline (:foundation IconFontIcon; the
                SDL3 / Skia renderer split is handled inside :ui - this module
                never sees it). Fonts come from data.kres.
-     jvm     - upstream Compose Desktop: a classpath ResourceFont carrying the
-               variable-font axes via FontVariation.Settings + BasicText.
+     jvm     - Skiko directly: the classpath font/<Style>.ttf, cloned per axis
+               set (Typeface.makeClone) and drawn as a TextLine.
 
-   The app owns the font files for both stacks (data.kres Zip task on native,
-   jvm resources at font/<Style>.ttf on JVM - see :demo's build file). */
+   The app owns the font files for both stacks (data.kres on native, jvm
+   resources at font/<Style>.ttf - both wired by buildSrc's
+   registerComposeFontBundling { bundleMaterialSymbols = true }). */
 sealed class MaterialSymbolsIcon {
 
     /** Font-family key the glyphs render under (also the install/cache key). */

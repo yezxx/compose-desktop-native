@@ -283,6 +283,5 @@ to DEFLATE them for a smaller distributable - the runtime inflates on read.
   tracks keeps every target on the same API. The values come straight from the
   release the plugin shipped with; no need to read `compose.properties` by hand.
 - Requires Gradle 8.8+ when applied in settings (`gradle.lifecycle.beforeProject`).
-- App windowing/main-loop (`com.bitsycore.compose:desktop-native-window`) and the icon
-  font module (`material-symbols`) are the port's own APIs - depend on them
-  directly; no substitution involved.
+- App windowing/main-loop (`com.bitsycore.compose:desktop-native-window`) is the
+  port's own API - depend on it directly; no substitution involved.

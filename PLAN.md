@@ -455,8 +455,8 @@ re-vendoring.** The debt is **completing native-actual stubs**.
       falling back to the bundled default if NONE is installed. So serif/cursive already
       render as a real serif/cursive wherever the OS ships one (all three target OSes do).
       The only true gap is **cross-platform pixel-identity** / a host with no serif installed,
-      which needs a BUNDLED Noto Serif - an app-level opt-in (buildSrc `downloadNotoFonts` +
-      data.kres size cost), not a library correctness bug. **Decision:** leave library
+      which needs a BUNDLED Noto Serif - an opt-in alongside the bridge plugin's
+      default fonts (`compose.desktop.native { fonts {} }` + data.kres size cost), not a library correctness bug. **Decision:** leave library
       resolution as-is; offer bundled-serif as an opt-in later if an app needs it.
 - [x] **P1** Document the hand-rolled text engine as an **accepted architectural
       deviation** - **DONE:** rationale header added to the top of

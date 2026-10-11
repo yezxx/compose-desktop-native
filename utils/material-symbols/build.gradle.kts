@@ -23,7 +23,8 @@
 // jvmProcessResources stages the same fonts onto the JVM classpath at
 // font/<file>.ttf (see :demo's build file).
 //
-// Publication artifactId (when set up): compose-desktop-material-symbols.
+// NOT published (kPublishedLibs in the root build) - an in-repo utility for the
+// demo apps until it is a polished, general-purpose API.
 
 import java.net.URI
 

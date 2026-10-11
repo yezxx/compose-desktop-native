@@ -221,8 +221,7 @@ fun main(args: Array<String>) {
     ) {
         // Material Symbols fonts auto-install on first use of the matching
         // MaterialSymbolsOutlined / Rounded / Sharp composable - no setup
-        // needed here. Apps that want to preload the bytes at startup can
-        // still call .install() explicitly.
+        // needed here.
         MaterialTheme(colorScheme = darkColorScheme()) {
             if (vCli.screen != null) {
                 val vAllScreens = allCategories().flatMap { it.screens }

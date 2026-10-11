@@ -94,7 +94,7 @@ are non-null depends on the resolved renderer (`glContext` for Skia OpenGL,
 commonMain.dependencies {
     implementation(project(":compose:desktop:native:desktop-native-window")) // window shell + main loop
     implementation(project(":compose:material3:material3"))   // Material 3 widgets
-    implementation(project(":utils:material-symbols"))        // icon-font composables (optional)
+    implementation(project(":utils:material-symbols"))        // icon-font composables (in-repo utility, not published)
 }
 ```
 

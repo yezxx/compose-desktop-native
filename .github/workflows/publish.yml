@@ -51,12 +51,10 @@ jobs:
             # host-gated), so only its generated .module files carry the full
             # variant table - the macOS-published roots of v0.1.15 had NO
             # mingwX64 variants and Windows consumers could not resolve them.
-            # The host-independent jvm jar (:material-symbols) and the bridge
-            # plugin ride along on the same job.
+            # The host-independent bridge plugin rides along on the same job.
             tasks: >-
               publishMingwX64PublicationToGitHubPackagesRepository
               publishKotlinMultiplatformPublicationToGitHubPackagesRepository
-              publishJvmPublicationToGitHubPackagesRepository
               :compose-desktop-native-bridge:publishAllPublicationsToGitHubPackagesRepository
 
     runs-on: ${{ matrix.runner }}
@@ -154,14 +152,14 @@ jobs:
           VER="${PUBLISH_VERSION#v}"
           OWNER="${GITHUB_REPOSITORY%%/*}"
           # Keep in sync with the module list in settings.gradle.kts.
-          MODULES="sdl-core ui ui-graphics ui-text ui-util ui-geometry ui-unit ui-backhandler ui-tooling-preview animation animation-core animation-graphics foundation foundation-layout material3 material-ripple desktop-native-window material-symbols navigation3-ui components-resources"
+          MODULES="sdl-core ui ui-graphics ui-text ui-util ui-geometry ui-unit ui-backhandler ui-tooling-preview animation animation-core animation-graphics foundation foundation-layout material3 material-ripple desktop-native-window navigation3-ui components-resources"
           case "${{ matrix.host }}" in
             macos)   SUFFIXES="-macosarm64" ;;
             linux)   SUFFIXES="-linuxx64 -linuxarm64" ;;
             windows) SUFFIXES="_ROOT_ -mingwx64" ;;
           esac
           # Published group per module - mirrors the per-area com.bitsycore groups
-          # in root build.gradle.kts. Project-only modules (sdl-core, material-symbols)
+          # in root build.gradle.kts. Project-only modules (sdl-core)
           # fall through to com.bitsycore.compose.sdl; the GitHub Packages Maven
           # package name is "<group>.<artifact>".
           group_of() {
@@ -186,7 +184,6 @@ jobs:
               done
             done
             if [ "${{ matrix.host }}" = "windows" ]; then
-              echo "com.bitsycore.compose.sdl.material-symbols-jvm"
               echo "com.bitsycore.compose.sdl.compose-desktop-native-bridge"
               echo "com.bitsycore.compose-desktop-native.bridge.com.bitsycore.compose-desktop-native.bridge.gradle.plugin"
             fi
@@ -256,10 +253,9 @@ jobs:
 
       # Release binaries for the host target - the binary plus the data.kres
       # (bundled composeResources + fonts + subset icon-font). Each app's
-      # linkReleaseExecutable<Target> auto-runs its data.kres zip task -
-      # :demo's own copy<Variant>ComposeResources<Target>, :apidemo's
-      # bridge-plugin package<Variant>ComposeResources<Target> - so data.kres
-      # is produced next to the .kexe / .exe. On Linux only linuxX64 is built -
+      # linkReleaseExecutable<Target> auto-runs the bridge plugin's
+      # package<Variant>ComposeResources<Target> zip task, so data.kres is
+      # produced next to the .kexe / .exe. On Linux only linuxX64 is built -
       # linuxArm64 is skipped since the SDL3 static libs on the ubuntu runner
       # are host-arch (x64).
       - name: Build demo + apidemo release binaries
