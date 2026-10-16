@@ -28,7 +28,9 @@ import kotlinx.cinterop.reinterpret
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import sdl3.SDL_GetModState
 import sdl3.SDL_GetTicks
+import sdl3.SDL_KMOD_SHIFT
 import sdl3.SDL_SetWindowTitle
 
 // ==================
@@ -360,7 +362,17 @@ internal class WindowInstance(
 		needsFrame = true
 		installGlobals()
 		val vDpr = backend.pixelDensity
-		host.onWheel(inEvent.x * vDpr, inEvent.y * vDpr, inEvent.deltaX, inEvent.deltaY, SDL_GetTicks().toLong())
+		// Shift+wheel scrolls horizontally, like desktop browsers: Compose's
+		// horizontalScroll containers (wide tables, long code lines) consume only the x
+		// delta, and a plain mouse wheel has no horizontal axis. The modifier state comes
+		// from SDL - the wheel event itself carries no modifiers.
+		var vDeltaX = inEvent.deltaX
+		var vDeltaY = inEvent.deltaY
+		if (vDeltaX == 0f && vDeltaY != 0f && (SDL_GetModState().toInt() and SDL_KMOD_SHIFT.toInt()) != 0) {
+			vDeltaX = vDeltaY
+			vDeltaY = 0f
+		}
+		host.onWheel(inEvent.x * vDpr, inEvent.y * vDpr, vDeltaX, vDeltaY, SDL_GetTicks().toLong())
 	}
 
 	fun onKeyEvent(inEvent: AppEvent.Key) {
