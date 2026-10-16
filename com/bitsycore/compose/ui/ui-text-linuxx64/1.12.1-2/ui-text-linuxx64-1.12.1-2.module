@@ -1,0 +1,202 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../ui-text/1.12.1-2/ui-text-1.12.1-2.module",
+    "group": "com.bitsycore.compose.ui",
+    "module": "ui-text",
+    "version": "1.12.1-2",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.7.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "linuxX64ApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-api",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui-graphics",
+          "version": {
+            "requires": "1.12.1-2"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui-unit",
+          "version": {
+            "requires": "1.12.1-2"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui-util",
+          "version": {
+            "requires": "1.12.1-2"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.12.1"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime-saveable",
+          "version": {
+            "requires": "1.12.1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.4.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.11.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.skiko",
+          "module": "skiko",
+          "version": {
+            "requires": "0.150.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "ui-text-linuxX64Main-1.12.1-2.klib",
+          "url": "ui-text-linuxx64-1.12.1-2.klib",
+          "size": 701739,
+          "sha512": "6b45f975975c658303ca63a5c38ed51aec0b6c9d5eaffee6dcf8ef623b89aaa21ae02bd34f355c983aab181d0df19738cb004b80a9733ea40c2b113fe09a1ce3",
+          "sha256": "843ea7b52a7119d41ea8cd7d78451a941625ed0ac36aa44c8ff3a065a49c6766",
+          "sha1": "c814c22078f79b64c9d58cb1987f853ce4a02e63",
+          "md5": "9540fbe929024ebcb07ee6633f2f90b8"
+        }
+      ]
+    },
+    {
+      "name": "linuxX64SourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "files": [
+        {
+          "name": "ui-text-linuxx64-1.12.1-2-sources.jar",
+          "url": "ui-text-linuxx64-1.12.1-2-sources.jar",
+          "size": 240163,
+          "sha512": "6a68a73e40e674a65cc27b46e9f9a2610c004ff11b9a44235e385fded551920fe778f1751bd7a7582dfd03c80e494c43c3c44c9f5d57686f99688b9cb905d987",
+          "sha256": "1650d7350068a67cf23d288c8c201c688bf811f6ae3725d8f387ef7a2672daac",
+          "sha1": "4ab997139d96be80b003becca9b6cf3363894d09",
+          "md5": "2e0e11f0997f0b548e1ccd254efd8d03"
+        }
+      ]
+    },
+    {
+      "name": "linuxX64ResourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.libraryelements": "kotlin-multiplatformresources",
+        "org.gradle.usage": "kotlin-multiplatformresources",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui-graphics",
+          "version": {
+            "requires": "1.12.1-2"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui-unit",
+          "version": {
+            "requires": "1.12.1-2"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui-util",
+          "version": {
+            "requires": "1.12.1-2"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.12.1"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime-saveable",
+          "version": {
+            "requires": "1.12.1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.4.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.11.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.skiko",
+          "module": "skiko",
+          "version": {
+            "requires": "0.150.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "ui-text-1.12.1-2.kotlin_resources.zip",
+          "url": "ui-text-linuxx64-1.12.1-2-kotlin_resources.kotlin_resources.zip",
+          "size": 352,
+          "sha512": "83ebad2a058c3f14452704b4ef9e9e74bb1b2470b41c61b4d7ee36a6d65056377c480245ce24385f374f2a322839a415fa6aa13b2a3d34423bee9cff8626936f",
+          "sha256": "b36faaad409f100064df27cf222ae15a51f5a65c42a4aa770e44857361f32f72",
+          "sha1": "fec7c6a3bc4bafa3181777c499eab96cc60ae46f",
+          "md5": "21b6cea49fc6dae1ff5db2f0ed17ba62"
+        }
+      ]
+    }
+  ]
+}
