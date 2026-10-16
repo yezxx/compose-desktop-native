@@ -21,6 +21,7 @@ import org.jetbrains.skia.Font as SkFont
 import org.jetbrains.skia.FontEdging as SkFontEdging
 import org.jetbrains.skia.FontHinting as SkFontHinting
 import org.jetbrains.skia.FontStyle as SkFontStyle
+import org.jetbrains.skia.FontSlant
 import org.jetbrains.skia.Paint as SkPaint
 import org.jetbrains.skia.paragraph.Alignment as SkAlignment
 import org.jetbrains.skia.paragraph.BaselineMode
@@ -462,7 +463,21 @@ internal class SkiaParagraphOps(
 		ts.topRatio = (style.lineHeightStyle?.alignment ?: LineHeightStyle.Alignment.Proportional).topRatio
 		// Span/base background fill behind the run.
 		if (background.isSpecified) ts.background = SkPaint().also { it.color = background.toArgb() }
-		if (fontStyle == FontStyle.Italic) ts.fontStyle = SkFontStyle.ITALIC
+		// 段落级 skia FontStyle 也要带字重：显式 typeface 的字重是靠 wght 轴克隆出来的（拉丁字体），
+		// 但 CJK 等缺失字形要走 FontCollection 的系统字体回退，回退匹配用的就是这个 fontStyle。
+		// 此前只设置斜体、字重恒为 Normal，系统回退永远命中 Regular 字面，中文加粗（含标题）全部失效。
+		val skiaWeight =
+			variations
+				?.firstOrNull { it.axisName == "wght" }
+				?.toVariationValue(null)
+				?.toInt()
+				?: SkFontStyle.NORMAL.weight
+		ts.fontStyle =
+			SkFontStyle(
+				skiaWeight,
+				SkFontStyle.NORMAL.width,
+				if (fontStyle == FontStyle.Italic) FontSlant.ITALIC else FontSlant.UPRIGHT,
+			)
 		decoration?.takeUnless { it == TextDecoration.None }?.let {
 			ts.decorationStyle = SkDecorationStyle(
 				it.contains(TextDecoration.Underline), false, it.contains(TextDecoration.LineThrough),
