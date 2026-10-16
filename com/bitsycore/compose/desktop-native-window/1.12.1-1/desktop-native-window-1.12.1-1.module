@@ -1,0 +1,276 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.bitsycore.compose",
+    "module": "desktop-native-window",
+    "version": "1.12.1-1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.7.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "metadataApiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-metadata",
+        "org.jetbrains.kotlin.platform.type": "common"
+      },
+      "dependencies": [
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.foundation",
+          "module": "foundation",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.animation",
+          "module": "animation-core",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.4.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.11.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-test",
+          "version": {
+            "requires": "1.11.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "desktop-native-window-metadata-1.12.1-1.jar",
+          "url": "desktop-native-window-1.12.1-1.jar",
+          "size": 18426,
+          "sha512": "16e71f6386a8ce40ebe977ad4f210519993e7cca1ce81932262a66d5d2790be357ebce1ae4418180bf5f4c38beec2a9a47b78c6c6be3e04c60dc5c3fc79948f3",
+          "sha256": "ea669672c739c6e3fdcfae937273811a0478b707433480ecf0fe53af68e6b515",
+          "sha1": "8bc305451b05f133dad206ee8968e382615801d7",
+          "md5": "220895de4b9a92314b179025e8544a93"
+        }
+      ]
+    },
+    {
+      "name": "metadataSourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.platform.type": "common"
+      },
+      "files": [
+        {
+          "name": "desktop-native-window-kotlin-1.12.1-1-sources.jar",
+          "url": "desktop-native-window-1.12.1-1-sources.jar",
+          "size": 26011,
+          "sha512": "64cc607972af63cb5e6c0187fdf8103e5a488f32d492cc8be1216f037b12aa7a778da47af3c8c6f5949c7220c07ddd0a855053f393b53b2fc91a00db14c5e2a7",
+          "sha256": "4ed3e3666b731d5190518d74e5ca708ea09ba0d19c038e90136459a9c1a4965f",
+          "sha1": "8433d915c45ab012f194f6aa77cb99a1e44b6da9",
+          "md5": "7fe3943915131483d5571cc400d446eb"
+        }
+      ]
+    },
+    {
+      "name": "linuxArm64ApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-api",
+        "org.jetbrains.kotlin.native.target": "linux_arm64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-linuxarm64/1.12.1-1/desktop-native-window-linuxarm64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-linuxarm64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "linuxArm64SourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.native.target": "linux_arm64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-linuxarm64/1.12.1-1/desktop-native-window-linuxarm64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-linuxarm64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "linuxArm64ResourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.libraryelements": "kotlin-multiplatformresources",
+        "org.gradle.usage": "kotlin-multiplatformresources",
+        "org.jetbrains.kotlin.native.target": "linux_arm64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-linuxarm64/1.12.1-1/desktop-native-window-linuxarm64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-linuxarm64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "linuxX64ApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-api",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-linuxx64/1.12.1-1/desktop-native-window-linuxx64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-linuxx64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "linuxX64SourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-linuxx64/1.12.1-1/desktop-native-window-linuxx64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-linuxx64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "linuxX64ResourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.libraryelements": "kotlin-multiplatformresources",
+        "org.gradle.usage": "kotlin-multiplatformresources",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-linuxx64/1.12.1-1/desktop-native-window-linuxx64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-linuxx64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "macosArm64ApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-api",
+        "org.jetbrains.kotlin.native.target": "macos_arm64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-macosarm64/1.12.1-1/desktop-native-window-macosarm64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-macosarm64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "macosArm64SourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.native.target": "macos_arm64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-macosarm64/1.12.1-1/desktop-native-window-macosarm64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-macosarm64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "macosArm64ResourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.libraryelements": "kotlin-multiplatformresources",
+        "org.gradle.usage": "kotlin-multiplatformresources",
+        "org.jetbrains.kotlin.native.target": "macos_arm64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-macosarm64/1.12.1-1/desktop-native-window-macosarm64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-macosarm64",
+        "version": "1.12.1-1"
+      }
+    },
+    {
+      "name": "macosArm64MetadataElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-metadata",
+        "org.jetbrains.kotlin.native.target": "macos_arm64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "available-at": {
+        "url": "../../desktop-native-window-macosarm64/1.12.1-1/desktop-native-window-macosarm64-1.12.1-1.module",
+        "group": "com.bitsycore.compose",
+        "module": "desktop-native-window-macosarm64",
+        "version": "1.12.1-1"
+      }
+    }
+  ]
+}

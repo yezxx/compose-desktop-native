@@ -1,0 +1,174 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../desktop-native-window/1.12.1-1/desktop-native-window-1.12.1-1.module",
+    "group": "com.bitsycore.compose",
+    "module": "desktop-native-window",
+    "version": "1.12.1-1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.7.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "linuxX64ApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-api",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.foundation",
+          "module": "foundation",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.animation",
+          "module": "animation-core",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.4.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.11.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-test",
+          "version": {
+            "requires": "1.11.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "desktop-native-window-linuxX64Main-1.12.1-1.klib",
+          "url": "desktop-native-window-linuxx64-1.12.1-1.klib",
+          "size": 99597,
+          "sha512": "900a8d745db055ca655556342e71e65dfb652b8f26a4acd24859bd5d32d12dc15eb68217389e33e36ba2e33d355a6661e93d99660ec88aa23ddcdc8121bf0115",
+          "sha256": "1e87fc3e674d3f060753735b5e63d8c42700a63988463fc4183887f7f3fe0227",
+          "sha1": "bf95ba640dcd3f5c6de7ae2edcc5404e8e6f012a",
+          "md5": "993eca66ad6ec6a859e07f94ff7ce223"
+        }
+      ]
+    },
+    {
+      "name": "linuxX64SourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.usage": "kotlin-runtime",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "files": [
+        {
+          "name": "desktop-native-window-linuxx64-1.12.1-1-sources.jar",
+          "url": "desktop-native-window-linuxx64-1.12.1-1-sources.jar",
+          "size": 26011,
+          "sha512": "64cc607972af63cb5e6c0187fdf8103e5a488f32d492cc8be1216f037b12aa7a778da47af3c8c6f5949c7220c07ddd0a855053f393b53b2fc91a00db14c5e2a7",
+          "sha256": "4ed3e3666b731d5190518d74e5ca708ea09ba0d19c038e90136459a9c1a4965f",
+          "sha1": "8433d915c45ab012f194f6aa77cb99a1e44b6da9",
+          "md5": "7fe3943915131483d5571cc400d446eb"
+        }
+      ]
+    },
+    {
+      "name": "linuxX64ResourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "non-jvm",
+        "org.gradle.libraryelements": "kotlin-multiplatformresources",
+        "org.gradle.usage": "kotlin-multiplatformresources",
+        "org.jetbrains.kotlin.native.target": "linux_x64",
+        "org.jetbrains.kotlin.platform.type": "native"
+      },
+      "dependencies": [
+        {
+          "group": "com.bitsycore.compose.ui",
+          "module": "ui",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.foundation",
+          "module": "foundation",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "com.bitsycore.compose.animation",
+          "module": "animation-core",
+          "version": {
+            "requires": "1.12.1-1"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.4.20"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-core",
+          "version": {
+            "requires": "1.11.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-coroutines-test",
+          "version": {
+            "requires": "1.11.0"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "desktop-native-window-1.12.1-1.kotlin_resources.zip",
+          "url": "desktop-native-window-linuxx64-1.12.1-1-kotlin_resources.kotlin_resources.zip",
+          "size": 374,
+          "sha512": "fea185f57a85c99059e4881959956010d95d408da742c94b668b4e70a10f08bb84fb3f300e95c0401103a9a35cdcf888c9d502e78521595f51108a004c1dcb66",
+          "sha256": "e76df43f75f2f930f3ea3af506ed56b1f5f6a32241b862e4c42e4608c55e76ee",
+          "sha1": "87e04fd27feedc663f541f8172bf7a941991cc57",
+          "md5": "fc971afc7cbc193945a058a5f81e2915"
+        }
+      ]
+    }
+  ]
+}
